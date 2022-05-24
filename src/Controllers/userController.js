@@ -38,5 +38,29 @@ const Login =async function(req,res){
     }
 }
 
-module.exports ={Login}
+
+
+
+
+
+
+const getUserById = async function (req, res) {
+    try {
+        const userId = req.params.userId
+
+        if (!Validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Invalid userId" })
+
+        const userData = await userModel
+            .findOne({ _id: userId })
+            .select({ address:1, _id:1, fname:1,lname:1, email:1, profileImage:1, phone:1, password:1  })
+
+        if (!userData) return res.status(404).send({ status: false, message: "User is not found or book is deleted" })
+        return res.status(200).send({ status: true,message:"user profile details", data: userData })
+    }catch(err){
+        res.status(500).send({ status: false, message: err.message })
+
+    }
+}
+
+module.exports ={Login,getUserById}
 

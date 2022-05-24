@@ -4,5 +4,8 @@ const userController = require("../Controllers/userController")
 
 router.post("/login",userController.Login);
 
+
+
+router.get("/user/:userId/profile",userController.getUserById)
 //export router
 module.exports = router;
