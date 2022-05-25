@@ -209,17 +209,20 @@ const updatedUser = async function (req, res) {
         let { fname, lname, email, phone, password, address } = data
 
 
-        // if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
+        
+        if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
+        if(fname)
         if (!Validator.isValidString(fname)) return res.status(400).send({ status: false, message: "First name  must be alphabetic characters" })
+        if(lname)
         if (!Validator.isValidString(lname)) return res.status(400).send({ status: false, message: "Invalid last name name : Should contain alphabetic characters only" });
-
-        // if (!Validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid email address" }) };
-        // const isEmailUsed = await userModel.findOne({ email: email });
-        // if (isEmailUsed) return res.status(400).send({ status: false, message: "email is already used, try different one" });
-
-        // if (!Validator.isValidPhone(phone)) return res.status(400).send({ status: false, message: "Invalid phone number : must contain 10 digit and only number." });
-        // const isPhoneUsed = await userModel.findOne({ phone: phone });
-        // if (isPhoneUsed) return res.status(400).send({ status: false, message: "phone is already used, try different one" });
+       if(email)
+        if (!Validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid email address" }) };
+         const isEmailUsed = await userModel.findOne({ email: email });
+        if (isEmailUsed) return res.status(400).send({ status: false, message: "email is already used, try different one" });
+        if(phone)
+        if (!Validator.isValidPhone(phone)) return res.status(400).send({ status: false, message: "Invalid phone number : must contain 10 digit and only number." });
+        const isPhoneUsed = await userModel.findOne({ phone: phone });
+        if (isPhoneUsed) return res.status(400).send({ status: false, message: "phone is already used, try different one" });
 
         // if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456"});
 
