@@ -19,6 +19,7 @@
   "homepage": "https://github.com/thoriumjaspreet/project-productsManagementGroup49#readme",
   "dependencies": {
     "aws-sdk": "^2.1141.0",
+    "bcrypt": "^5.0.1",
     "express": "^4.18.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.4",
