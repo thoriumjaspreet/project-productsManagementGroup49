@@ -25,6 +25,8 @@ const isValidPhone = function(value){
     if( /^\d{10}$/.test(value)) {return true}
     else return false
 }
+
+
 const isValidPassword = function(value){
     if(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/.test(value)==true) {return true}
     else return false

@@ -140,8 +140,6 @@ const userCreate = async function (req, res) {
     }
 }
 
-
-
 /**************************************** Login user ******************************************/
 
 const Login = async function (req, res) {
