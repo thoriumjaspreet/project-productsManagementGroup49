@@ -45,9 +45,18 @@ function isValidTitle(value){
    if( ["Mr", "Miss", "Mrs"].indexOf(value) == -1) {return false}
    else return true
 }
+
+function isValidavailableSizes(value){
+
+    if( ["S", "XS","M","X", "L","XXL", "XL"].indexOf(value) == -1) {return false}
+    else return true
+ }
+ 
+
 function isValidDate(value){
     var regEx = /^\d{4}-\d{2}-\d{2}$/;
     if(!value.match(regEx)) return false; 
     return true
 }
-module.exports = {isValid , isValidPhone,isValidEmail , isValidPassword,isValidObjectId,isValidTitle, isValidReqBody,isValidString,isValidDate}
+module.exports = {isValid , isValidPhone,isValidEmail , isValidPassword,isValidObjectId,isValidTitle,
+     isValidReqBody,isValidString,isValidDate,isValidavailableSizes}

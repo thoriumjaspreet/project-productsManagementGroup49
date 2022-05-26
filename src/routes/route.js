@@ -14,7 +14,7 @@ router.put("/user/:userId/profile",userController.updatedUser)
 
 
 
-router.post("/products")
+router.post("/products",productController.createProduct)
 
 //export router
 module.exports = router;

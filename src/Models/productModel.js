@@ -41,7 +41,7 @@ const productModel = new mongoose.Schema({
 
     style:
      {
-         type:string
+         type:String
         },
     availableSizes: 
     {
