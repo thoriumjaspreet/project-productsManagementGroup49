@@ -90,50 +90,33 @@ const userCreate = async function (req, res) {
         if (!Validator.isValid(password)) return res.status(400).send({ status: false, message: "Password is Required" });
         if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456" });
         const saltRounds = 10;
-    let encryptedPassword = bcrypt
-      .hash(data.password, saltRounds)
-      .then((hash) => {
-        console.log(`Hash: ${hash}`);
-        return hash;
-      });
+        let encryptedPassword = bcrypt
+        .hash(data.password, saltRounds)
+        .then((hash) => {
+          console.log(`Hash: ${hash}`);
+          return hash;
+        });
+        data.password = await encryptedPassword;
+        let address=JSON.parse(req.body.address)
+        data.address=address
+          
 
-    data.password = await encryptedPassword;
-   // console.log(data);
+       if(!address)return  res.status(400).send({status: false,message: "address is Required"});
+    if(!address.shipping) return  res.status(400).send({status: false,message: "shipping is Required"});
+    if(!address.shipping.street) return  res.status(400).send({status: false,message: "street is Required"});
+    if(!address.shipping.city) return  res.status(400).send({status: false,message: "city is Required"});
+    if(!address.shipping.pincode) return  res.status(400).send({status: false,message: "pincode is Required"});
+    if(!/^[0-9]{6}$/.test(address.shipping.pincode)) return res.status(400).send({status: false,message: "Pincode  is not valid minlenght:-6"});
 
+    if(!address.billing) return  res.status(400).send({status: false,message: "billing is Required"});    
+    if(!address.billing.street) return  res.status(400).send({status: false,message: "street is Required"});
+    if(!address.billing.city) return  res.status(400).send({status: false,message: "city is Required"});
+    if(!address.billing.pincode) return  res.status(400).send({status: false,message: "pincode is Required"});    
+    if(!/^[0-9]{6}$/.test(address.billing.pincode)) return res.status(400).send({status: false,message: "Pincode  is not valid minlenght:-6"});
         
-        let address = JSON.parse(req.body.address)
-        data.address = address
-
-
-        console.log(address)
-
-        if (!address) return res.status(400).send({ status: false, message: "address is Required" });
-        if (!address.shipping) return res.status(400).send({ status: false, message: "shipping is Required" });
-        if (!address.shipping.street) return res.status(400).send({ status: false, message: "street is Required" });
-        if (!address.shipping.city) return res.status(400).send({ status: false, message: "city is Required" });
-        if (!address.shipping.pincode) return res.status(400).send({ status: false, message: "pincode is Required" });
-
-        if (!address.billing) return res.status(400).send({ status: false, message: "billing is Required" });
-        if (!address.billing.street) return res.status(400).send({ status: false, message: "street is Required" });
-        if (!address.billing.city) return res.status(400).send({ status: false, message: "city is Required" });
-        if (!address.billing.pincode) return res.status(400).send({ status: false, message: "pincode is Required" });
-
-
-
-
-        //if(!/^[0-9]{6}$/.test(data.address.pincode)) return res.status(400).send({status: false,message: "Pincode  is not valid minlenght:-6"});
-
-
-
-        //Newly created book can only have 0 reviews
-        //if(data.reviews&&data.reviews!=0) return res.status(400).send({status : false , message : "Newly created book can only have 0 reviews"})
-
-        //Newly created book can only have isDeleted : false
-        //if(data.isDeleted&&data.isDeleted!=false) return res.status(400).send({status : false , message : "Newly created book can only have isDeleted : false"})
-
         let saveData = await userModel.create(data)
-        console.log(saveData)
-        return res.status(201).send({ status: true, msg: "User createted successfully", data: saveData })
+        return res.status(201).send({status:true,msg:"User createted successfully",data:saveData})
+    
     }
     catch (err) {
         return res.status(500).send({ status: false, message: err.message });
@@ -154,10 +137,19 @@ const Login = async function (req, res) {
 
         if (!Validator.isValid(password)) { return res.status(400).send({ status: false, message: "Password is Required" }); }
 
-        let logCheck = await userModel.findOne({ email: email, password: password });
-        if (!logCheck) {
-            return res.status(400).send({ status: false, message: "This email id and password not valid" });
+             let encryptedPassword = bcrypt
+        .hash(data.password, saltRounds)
+        .then((hash) => {
+          console.log(`Hash: ${hash}`);
+          return hash;
+        });
+       
+       
+        let logCheck = await userModel.findOne({email:email,password:encryptedPassword});
+        if(!logCheck){
+            return res.status(400).send({ status: false, message: "This email id and password not valid"});
         }
+       
 
         //create the jwt token 
         let token = jwt.sign({
@@ -225,17 +217,24 @@ const updatedUser = async function (req, res) {
         // if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456"});
 
 
+        let encryptedPassword = bcrypt
+        .hash(data.password, saltRounds)
+        .then((hash) => {
+          console.log(`Hash: ${hash}`);
+          return hash;
+        });
+       let pwd = await encryptedPassword;
+       
+
         let fieldToUpdate = {
             fname: req.body.fname,
             lname: req.body.lname,
             phone: req.body.phone,
             email: req.body.email,
-            password: req.body.password,
+            password: pwd
         };
         let files = req.files
         if (files && files.length > 0) {
-            //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL = await uploadFile(files[0])
             fieldToUpdate.profileImage = uploadedFileURL
         }
@@ -243,27 +242,29 @@ const updatedUser = async function (req, res) {
             if (!value) delete fieldToUpdate[key];
         }
 
-
-
         if (address) {
             let add = JSON.parse(req.body.address);
             let obj = {
-
                 billing: add.billing,
-                street: add.billing.street,
-                city: add.billing.city,
-                pincode: add.billing.pincode,
                 shipping: add.shipping,
-                street: add.shipping.street,
-                city: add.shipping.city,
-                pincode: add.shipping.pincode
             };
 
             for (const [key, value] of Object.entries(obj)) {
                 if (!value) delete obj[key];
             }
-
-            fieldToUpdate.address = { ...obj };
+            let obj1={
+                street: add.billing.street,
+                city: add.billing.city,
+                pincode: add.billing.pincode,
+                street: add.shipping.street,
+                city: add.shipping.city,
+                pincode: add.shipping.pincode};
+                for (const [key, value] of Object.entries(obj1)) {
+                    if (!value) delete obj1[key];
+                }
+                obj.shipping ={...obj1}
+                obj.billing={...obj1} 
+                fieldToUpdate.address = { ...obj };
         }
         let updatedData = await userModel.findOneAndUpdate({ _id: user }, { $set: { ...fieldToUpdate } }, { new: true })
         return res.status(200).send({ status: true, message: "User profile updated", data: updatedData })
