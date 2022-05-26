@@ -1,45 +1,9 @@
 const jwt = require('jsonwebtoken')
 const userModel = require('../models/userModel')
 const Validator = require('../Validator/valid')
-const aws = require("aws-sdk")
-var validator = require("email-validator");
+const {uploadFile} =require('../aws/AWS')
 const bcrypt = require('bcrypt');
-
-aws.config.update({
-    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
-    secretAccessKey: "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",
-    region: "ap-south-1"
-})
-
-let uploadFile = async (file) => {
-    return new Promise(function (resolve, reject) {
-        // this function will upload file to aws and return the link
-        let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
-
-        var uploadParams = {
-            ACL: "public-read",
-            Bucket: "classroom-training-bucket",  //HERE
-            Key: "abc/" + file.originalname, //HERE 
-            Body: file.buffer
-        }
-
-
-        s3.upload(uploadParams, function (err, data) {
-            if (err) {
-                return reject({ "error": err })
-            }
-            console.log(data)
-            console.log("file uploaded succesfully")
-            return resolve(data.Location)
-        })
-
-        // let data= await s3.upload( uploadParams)
-        // if( data) return data.Location
-        // else return "there is an error"
-
-    })
-}
-
+const saltRounds = 10;
 
 const userCreate = async function (req, res) {
 
@@ -60,7 +24,7 @@ const userCreate = async function (req, res) {
         if (!Validator.isValidString(lname)) return res.status(400).send({ status: false, message: "Invalid last name name : Should contain alphabetic characters only" });
 
       if(!Validator.isValid(email)) return res.status(400).send({status: false,message: "Email is Required"});
-        if (!validator.validate(email)) return res.status(400).send({ status: false, message: "Invalid email address" });
+        if (!Validator.isValidEmail(email)) return res.status(400).send({ status: false, message: "Invalid email address" });
 
         //check unique email
         const isEmailUsed = await userModel.findOne({ email: email });
@@ -89,7 +53,7 @@ const userCreate = async function (req, res) {
 
         if (!Validator.isValid(password)) return res.status(400).send({ status: false, message: "Password is Required" });
         if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456" });
-        const saltRounds = 10;
+       
         let encryptedPassword = bcrypt
         .hash(data.password, saltRounds)
         .then((hash) => {
@@ -137,29 +101,26 @@ const Login = async function (req, res) {
 
         if (!Validator.isValid(password)) { return res.status(400).send({ status: false, message: "Password is Required" }); }
 
-             let encryptedPassword = bcrypt
-        .hash(data.password, saltRounds)
-        .then((hash) => {
-          console.log(`Hash: ${hash}`);
-          return hash;
-        });
-       
-       
-        let logCheck = await userModel.findOne({email:email,password:encryptedPassword});
-        if(!logCheck){
-            return res.status(400).send({ status: false, message: "This email id and password not valid"});
+        let hash = await userModel.findOne({email:email});
+        if(!hash){
+            return res.status(400).send({ status: false, message: "This email id not valid"});
         }
+        let compare = bcrypt.compare(password, hash.password).then((res) => {
+            return res
+          });
+      
+          if (!compare) {return res.status(400).send({ status: false, msg: "credantials not valid" });}
        
 
         //create the jwt token 
         let token = jwt.sign({
-            userId: logCheck._id.toString(),
+            userId: hash._id.toString(),
             group: 49
 
         }, "project5Group49", { expiresIn: "1200s" });
         //res.setheader("x-api-key", token);
 
-        return res.status(200).send({ status: true, message: "Login Successful", iat: new String(Date()), userId: logCheck._id.toString(), token: token })
+        return res.status(200).send({ status: true, message: "User login successfull", iat: new String(Date()),data:{ userId: hash._id.toString(), token }})
     }
     catch (err) {
         return res.status(500).send({ status: false, message: err.message });
