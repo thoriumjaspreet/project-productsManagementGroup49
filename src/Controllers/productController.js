@@ -49,7 +49,7 @@ const createProduct = async function(req,res){
 
       let {title,description,price,currencyId,currencyFormat,productImage,style,availableSizes,installments}=data
       if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data" }) }
-
+ 
       if (!Validator.isValid(title)) return res.status(400).send({ status: false, message: "title is Required" });
       if (!Validator.isValidString(title)) return res.status(400).send({ status: false, message: "title  must be alphabetic characters" })
       
@@ -97,6 +97,32 @@ const createProduct = async function(req,res){
 }
 
 
+const getProductById = async function (req, res) {
+  try {
+      const productId = req.params.productId
+
+      if (!Validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid productId" })
+
+      const productData = await productModel
+          .findOne({ _id: productId ,isDeleted:false})
+          .select({ title: 1, _id: 1, description: 1, price: 1, currencyId: 1, currencyFormat: 1,
+            isFreeShipping:1, productImage: 1, style: 1,availableSizes:1,installments:1,isDeleted:1 })
+
+      if (!productData) return res.status(404).send({ status: false, message: "product is not found or product is deleted" })
+      return res.status(200).send({ status: true, message: "success", data: productData })
+  } catch (err) {
+      res.status(500).send({ status: false, message: err.message })
+
+  }
+}
 
 
-module.exports={createProduct}
+
+
+
+
+
+
+
+
+module.exports={createProduct,getProductById}
