@@ -52,5 +52,46 @@ const createProduct = async function(req,res){
 
 
 
+const getProduct = async function (req, res) {
+  try {
+    let filter = req.query;
+    let query = { isDeleted: false };
+    if (filter) {
+      const { name,description,isFreeShipping,priceGreaterThan,priceLessThan,style,size,installments,} = filter;
+      if (name) {
+        query.title = name.trim();
+      }
+      if (description) {
+        query.description = description.trim();
+      }
+      if (isFreeShipping) {
+        query.isFreeShipping = isFreeShipping;
+      }
+      if (style) {
+        query.style = style.trim();
+      }
+      if (installments) {
+        query.installments = installments;
+      }
+      if (size) {
+        const sizeArr = size
+          .trim()
+          .split(",")
+          .map((x) => x.trim());
+        query.availableSizes = { $all: sizeArr };
+      }
+    }
+   
+    let data = await productModel.find({$or:[query,{ $or: [{ price: { $gt: filter.priceGreaterThan } }, { price: { $lt:filter.priceLessThan } }] }]
+    }).sort({ price: filter.priceSort });
+   
+    if(data.length == 0) return res.status(404).send({status:false,msg:"product not found"})
 
-module.exports={createProduct}
+    return res.status(200).send({ status: true, message: "Success", data: data });
+  } catch (err) {
+    return res.status(500).send({ status: false, error: err.message });
+  }
+};
+
+
+module.exports={createProduct,getProduct}

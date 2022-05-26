@@ -11,6 +11,6 @@ router.get("/user/:userId/profile",Authentication,Authorization,userController.g
 router.put("/user/:userId/profile",Authentication,Authorization,userController.updatedUser)
 //Product APIs
 router.post("/products",productController.createProduct)
-
+router.get('/products',productController.getProduct)
 //export router
 module.exports = router;
