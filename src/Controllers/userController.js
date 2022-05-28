@@ -161,6 +161,12 @@ const updatedUser = async function (req, res) {
         let data = req.body
         let { fname, lname, email, phone, password, address } = data
        
+     const getAddress = await userModel.findById(user)
+
+     const copyAddress = JSON.parse(JSON.stringify(getAddress.address))
+
+
+         console.log(copyAddress)
 
         
         if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
