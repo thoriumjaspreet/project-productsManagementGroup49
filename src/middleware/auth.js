@@ -39,7 +39,7 @@ const Authorization = async function (req, res, next) {
         // verify the token 
         let decodedToken = jwt.verify(token, "project5Group49" )
          let decoded = decodedToken.userId
-            let userId = req.body.userId;
+         const userId = req.params.userId
             // check the user id present in body
             if(!Validator.isValid(userId)) return res.status(400).send({status: false,message: "userId is Required"});
             if(!Validator.isValidObjectId(userId))  return res.status(400).send({status: false,message: "userId is not valid"});

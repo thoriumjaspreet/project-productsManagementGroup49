@@ -8,7 +8,7 @@ const saltRounds = 10;
 const userCreate = async function (req, res) {
 
     try {
-        let data = req.body
+        let data = JSON.parse(JSON.stringify(req.body))
         
         let { fname, lname, phone, email,  password } = data
   
@@ -117,7 +117,7 @@ const Login = async function (req, res) {
             userId: hash._id.toString(),
             group: 49
 
-        }, "project5Group49", { expiresIn: "1200s" });
+        }, "project5Group49", { expiresIn: "120m" });
         //res.setheader("x-api-key", token);
 
         return res.status(200).send({ status: true, message: "User login successfull", iat: new String(Date()),data:{ userId: hash._id.toString(), token }})
@@ -152,13 +152,15 @@ const getUserById = async function (req, res) {
 
 
 
+
+
 //---Put-api------------------------*/
 const updatedUser = async function (req, res) {
     try {
         let user = req.params.userId
         let data = req.body
         let { fname, lname, email, phone, password, address } = data
-
+       
 
         
         if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
@@ -176,7 +178,9 @@ const updatedUser = async function (req, res) {
         if (isPhoneUsed) return res.status(400).send({ status: false, message: "phone is already used, try different one" });
 
         // if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456"});
-
+      
+      
+        if(password){
 
         let encryptedPassword = bcrypt
         .hash(data.password, saltRounds)
@@ -184,15 +188,16 @@ const updatedUser = async function (req, res) {
           console.log(`Hash: ${hash}`);
           return hash;
         });
-       let pwd = await encryptedPassword;
-       
+         data.pwd= await encryptedPassword;
+
+    }
 
         let fieldToUpdate = {
             fname: req.body.fname,
             lname: req.body.lname,
             phone: req.body.phone,
             email: req.body.email,
-            password: pwd
+            password: data.pwd
         };
         let files = req.files
         if (files && files.length > 0) {
@@ -217,13 +222,17 @@ const updatedUser = async function (req, res) {
                 street: add.billing.street,
                 city: add.billing.city,
                 pincode: add.billing.pincode,
-                street: add.shipping.street,
-                city: add.shipping.city,
-                pincode: add.shipping.pincode};
+                };
                 for (const [key, value] of Object.entries(obj1)) {
                     if (!value) delete obj1[key];
                 }
-                obj.shipping ={...obj1}
+               let obj2={ street: add.shipping.street,
+                city: add.shipping.city,
+                pincode: add.shipping.pincode } 
+                 for (const [key, value] of Object.entries(obj2)) {
+                if (!value) delete obj2[key];
+            }
+                obj.shipping ={...obj2}
                 obj.billing={...obj1} 
                 fieldToUpdate.address = { ...obj };
         }
