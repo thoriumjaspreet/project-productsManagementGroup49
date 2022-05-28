@@ -105,7 +105,7 @@ const Login = async function (req, res) {
         if(!hash){
             return res.status(400).send({ status: false, message: "This email id not valid"});
         }
-        let compare = bcrypt.compare(password, hash.password).then((res) => {
+        let compare = await bcrypt.compare(password, hash.password).then((res) => {
             return res
           });
       
