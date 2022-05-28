@@ -13,9 +13,6 @@ router.put("/user/:userId/profile",Authentication,Authorization,userController.u
 router.post("/products",productController.createProduct)
 router.get("/products/:productId",productController.getProductById)
 router.get('/products',productController.getProduct)
-
-router.get("/products/:productId",productController.getProductById)
-
 router.put("/products/:productId",productController.updateProduct)
 //export router
 module.exports = router;
