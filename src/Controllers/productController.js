@@ -2,7 +2,8 @@
 const productModel = require('../models/productModel')
 const Validator = require('../Validator/valid')
 const { uploadFile } = require('../aws/AWS')
-
+ 
+/*-------------CreatProduct-Api------------*/
 
 const createProduct = async function (req, res) {
   try {
@@ -53,7 +54,7 @@ const createProduct = async function (req, res) {
     return res.status(500).send({ status: false, error: err.message })
   }
 }
-
+/*----------getProductById---------------------*/
 
 const getProductById = async function (req, res) {
   try {
@@ -70,6 +71,7 @@ const getProductById = async function (req, res) {
 
   }
 }
+/*-----------getProduct-Api-------------*/
 
 const getProduct = async function (req, res) {
   try {
@@ -115,7 +117,7 @@ const getProduct = async function (req, res) {
   }
 };
 
-
+/*-------------delete-api--------------*/
 
 const deleteProduct = async function (req, res) {
   let productId = req.params.productId;
@@ -138,7 +140,7 @@ const deleteProduct = async function (req, res) {
   }
 };
 
-
+/*-----------Update/put Api---------------------*/
 
 
 const updateProduct = async function (req, res) {
