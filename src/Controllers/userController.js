@@ -8,9 +8,9 @@ const saltRounds = 10;
 const userCreate = async function (req, res) {
 
     try {
-        let data = JSON.parse(JSON.stringify(req.body))
+        let data = req.body
         
-        let { fname, lname, phone, email,  password } = data
+        let { fname, lname, phone, email,  password,address} = data
   
 
 
@@ -61,23 +61,28 @@ const userCreate = async function (req, res) {
           return hash;
         });
         data.password = await encryptedPassword;
-        let address=JSON.parse(req.body.address)
-        data.address=address
-          
-
-       if(!address)return  res.status(400).send({status: false,message: "address is Required"});
-    if(!address.shipping) return  res.status(400).send({status: false,message: "shipping is Required"});
-    if(!address.shipping.street) return  res.status(400).send({status: false,message: "street is Required"});
-    if(!address.shipping.city) return  res.status(400).send({status: false,message: "city is Required"});
-    if(!address.shipping.pincode) return  res.status(400).send({status: false,message: "pincode is Required"});
-    if(!/^[0-9]{6}$/.test(address.shipping.pincode)) return res.status(400).send({status: false,message: "Pincode  is not valid minlenght:-6"});
-
-    if(!address.billing) return  res.status(400).send({status: false,message: "billing is Required"});    
-    if(!address.billing.street) return  res.status(400).send({status: false,message: "street is Required"});
-    if(!address.billing.city) return  res.status(400).send({status: false,message: "city is Required"});
-    if(!address.billing.pincode) return  res.status(400).send({status: false,message: "pincode is Required"});    
-    if(!/^[0-9]{6}$/.test(address.billing.pincode)) return res.status(400).send({status: false,message: "Pincode  is not valid minlenght:-6"});
-        
+       
+       if(!address){return res.status(400).send({status: false,message: "address is Required"})}
+       else {
+       let add = JSON.parse(address)
+       //validation shipping
+    if(!add.shipping) return  res.status(400).send({status: false,massage: "shipping is Required"});
+    if(!Validator.isValid(add.shipping.street)) return  res.status(400).send({status: false,massage: "Shipping street is Required"});
+    if(!Validator.isValidString(add.shipping.street))return res.status(400).send({ status: false, massage: "Shipping street   must be alphabetic characters" })
+    if(!Validator.isValid(add.shipping.city)) return  res.status(400).send({status: false,message: "Shipping city is Required"});
+    if(!Validator.isValidString(add.shipping.city))return res.status(400).send({ status: false, massage: "Shipping city   must be alphabetic characters" })
+    if(!add.shipping.pincode) return  res.status(400).send({status: false,message: "shipping pincode is Required"});
+    if(!/^[0-9]{6}$/.test(add.shipping.pincode)) return res.status(400).send({status: false,message: "Shipping Pincode  is not valid minlenght:-6"});
+//validation of billing
+    if(!add.billing) return  res.status(400).send({status: false,message: "billing is Required"});    
+    if(!Validator.isValid(add.billing.street)) return  res.status(400).send({status: false,message: "Billing street is Required"});
+    if(!Validator.isValidString(add.billing.street))return res.status(400).send({ status: false, massage: "Billing street   must be alphabetic characters" })
+    if(!add.billing.city) return  res.status(400).send({status: false,message: "billing city is Required"});
+    if(!Validator.isValidString(add.billing.city))return res.status(400).send({ status: false, massage: "Billing city   must be alphabetic characters" })
+    if(!add.billing.pincode) return  res.status(400).send({status: false,message: "billig pincode is Required"});    
+    if(!/^[0-9]{6}$/.test(add.billing.pincode)) return res.status(400).send({status: false,message: "Billing Pincode  is not valid minlenght:-6"});
+    data.address = add
+       }  
         let saveData = await userModel.create(data)
         return res.status(201).send({status:true,msg:"User createted successfully",data:saveData})
     
@@ -105,11 +110,11 @@ const Login = async function (req, res) {
         if(!hash){
             return res.status(400).send({ status: false, message: "This email id not valid"});
         }
-        let compare = bcrypt.compare(password, hash.password).then((res) => {
+        let compare = await bcrypt.compare(password, hash.password).then((res) => {
             return res
           });
       
-          if (!compare) {return res.status(400).send({ status: false, msg: "credantials not valid" });}
+          if (!compare) {return res.status(400).send({ status: false, msg: "password not valid" });}
        
 
         //create the jwt token 
@@ -118,7 +123,8 @@ const Login = async function (req, res) {
             group: 49
 
         }, "project5Group49", { expiresIn: "120m" });
-        //res.setheader("x-api-key", token);
+
+        res.setHeader("x-api-key", token);
 
         return res.status(200).send({ status: true, message: "User login successfull", iat: new String(Date()),data:{ userId: hash._id.toString(), token }})
     }
@@ -136,11 +142,10 @@ const getUserById = async function (req, res) {
 
         if (!Validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Invalid userId" })
 
-        const userData = await userModel
-            .findOne({ _id: userId })
+        const userData = await userModel.findOne({ _id: userId })
             .select({ address: 1, _id: 1, fname: 1, lname: 1, email: 1, profileImage: 1, phone: 1, password: 1 })
 
-        if (!userData) return res.status(404).send({ status: false, message: "User is not found or book is deleted" })
+        if (!userData) return res.status(404).send({ status: false, message: "User is not found " })
         return res.status(200).send({ status: true, message: "user profile details", data: userData })
     } catch (err) {
         res.status(500).send({ status: false, message: err.message })
@@ -159,90 +164,78 @@ const updatedUser = async function (req, res) {
     try {
         let user = req.params.userId
         let data = req.body
+        let update= {}
+
         let { fname, lname, email, phone, password, address } = data
        
-     const getAddress = await userModel.findById(user)
-
-     const copyAddress = JSON.parse(JSON.stringify(getAddress.address))
-
-
-         console.log(copyAddress)
-
-        
+    
         if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
         if(fname)
         if (!Validator.isValidString(fname)) return res.status(400).send({ status: false, message: "First name  must be alphabetic characters" })
+        update["fname"]= fname
         if(lname)
         if (!Validator.isValidString(lname)) return res.status(400).send({ status: false, message: "Invalid last name name : Should contain alphabetic characters only" });
+         update["lname"]=lname
        if(email)
         if (!Validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid email address" }) };
          const isEmailUsed = await userModel.findOne({ email: email });
         if (isEmailUsed) return res.status(400).send({ status: false, message: "email is already used, try different one" });
+        update["email"]=email
         if(phone)
         if (!Validator.isValidPhone(phone)) return res.status(400).send({ status: false, message: "Invalid phone number : must contain 10 digit and only number." });
         const isPhoneUsed = await userModel.findOne({ phone: phone });
         if (isPhoneUsed) return res.status(400).send({ status: false, message: "phone is already used, try different one" });
-
-        // if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456"});
-      
-      
-        if(password){
-
-        let encryptedPassword = bcrypt
-        .hash(data.password, saltRounds)
+        update["phone"]=phone
+        if(password){ //check the password are given or not
+        if (!Validator.isValidPassword(password)) return res.status(400).send({ status: false, message: "Invalid password (length : 8-16) : Abcd@123456"});      
+        let encryptedPassword = bcrypt //convert to the password in bc
+        .hash(password, saltRounds)
         .then((hash) => {
           console.log(`Hash: ${hash}`);
           return hash;
         });
-         data.pwd= await encryptedPassword;
-
-    }
-
-        let fieldToUpdate = {
-            fname: req.body.fname,
-            lname: req.body.lname,
-            phone: req.body.phone,
-            email: req.body.email,
-            password: data.pwd
-        };
-        let files = req.files
-        if (files && files.length > 0) {
-            let uploadedFileURL = await uploadFile(files[0])
-            fieldToUpdate.profileImage = uploadedFileURL
-        }
-        for (const [key, value] of Object.entries(fieldToUpdate)) {
-            if (!value) delete fieldToUpdate[key];
-        }
-
+         update["password"]= await encryptedPassword;
+         let files = req.files
+         if (files && files.length > 0) {
+             let uploadedFileURL = await uploadFile(files[0])
+             update["profileImage"] = uploadedFileURL
+         }
+    } 
+ 
         if (address) {
-            let add = JSON.parse(req.body.address);
-            let obj = {
-                billing: add.billing,
-                shipping: add.shipping,
-            };
-
-            for (const [key, value] of Object.entries(obj)) {
-                if (!value) delete obj[key];
+            add = JSON.parse(address);
+           
+            const { shipping, billing } = add
+            if(shipping){
+                let {street,city,pincode} =shipping
+            if(street){
+                if(!Validator.isValidString(street))return res.status(400).send({ status: false, message: "Shipping street   must be alphabetic characters" })
+            update["address.shipping.street"]=street}
+            if(city){
+                if(!Validator.isValidString(city))return res.status(400).send({ status: false, message: "Shipping city must be alphabetic characters" })  
+                update["address.shipping.city"]=city
             }
-            let obj1={
-                street: add.billing.street,
-                city: add.billing.city,
-                pincode: add.billing.pincode,
-                };
-                for (const [key, value] of Object.entries(obj1)) {
-                    if (!value) delete obj1[key];
+            if(pincode){
+                if(!/^[0-9]{6}$/.test(pincode)) return res.status(400).send({ status: false, message: "Shipping pincode must be number min length 6"})
+                update["address.shipping.pincode"]=pincode
+            }}
+            if(billing){
+                let {street,city,pincode} = billing
+                if(street){
+                    if(!Validator.isValidString(street))return res.status(400).send({ status: false, message: "Billing street   must be alphabetic characters" })
+                update["address.billing.street"]=street
                 }
-               let obj2={ street: add.shipping.street,
-                city: add.shipping.city,
-                pincode: add.shipping.pincode } 
-                 for (const [key, value] of Object.entries(obj2)) {
-                if (!value) delete obj2[key];
+                if(city){
+                    if(!Validator.isValidString(city))return res.status(400).send({ status: false, message: "Billing city must be alphabetic characters" })  
+                    update["address.billing.city"]=city
+                }
+                if(pincode){
+                    if(!/^[0-9]{6}$/.test(pincode)) return res.status(400).send({ status: false, message: "Billing pincode must be number min length 6" })
+                    update["address.billing.phone"]=pincode
+                } 
             }
-                obj.shipping ={...obj2}
-                obj.billing={...obj1} 
-                fieldToUpdate.address = { ...obj };
         }
-        let updatedData = await userModel.findOneAndUpdate({ _id: user }, { $set: { ...fieldToUpdate } }, { new: true })
+        let updatedData = await userModel.findOneAndUpdate({ _id: user }, {$set:update}, { new: true })
         return res.status(200).send({ status: true, message: "User profile updated", data: updatedData })
 
     }
