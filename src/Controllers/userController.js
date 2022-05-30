@@ -62,7 +62,7 @@ const userCreate = async function (req, res) {
           return hash;
         });
         data.password = await encryptedPassword;
-       
+        //check address are given or not
        if(!address){return res.status(400).send({status: false,message: "address is Required"})}
        else {
        let add = JSON.parse(address)
