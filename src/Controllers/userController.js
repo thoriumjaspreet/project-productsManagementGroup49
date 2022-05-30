@@ -5,6 +5,7 @@ const {uploadFile} =require('../aws/AWS')
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+/*--------------Post/resgiste-api----------------*/
 const userCreate = async function (req, res) {
 
     try {
@@ -133,7 +134,7 @@ const Login = async function (req, res) {
     }
 }
 
-
+/*-----------getUserById-api--------------*/
 
 
 const getUserById = async function (req, res) {
@@ -153,13 +154,8 @@ const getUserById = async function (req, res) {
     }
 }
 
-
-
-
-
-
-
 //---Put-api------------------------*/
+
 const updatedUser = async function (req, res) {
     try {
         let user = req.params.userId

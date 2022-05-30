@@ -2,6 +2,7 @@ const express = require("express"); //import express
 const router = express.Router(); //used express to create route handlers
 const userController = require("../Controllers/userController")
 const productController=require("../Controllers/productController")
+const cartController=require("../Controllers/cartController")
 const {Authentication,Authorization} =require('../middleware/auth')
 
 //User APIs
@@ -15,6 +16,10 @@ router.get("/products/:productId",productController.getProductById)
 router.get('/products',productController.getProduct)
 router.delete("/products/:productId",productController.deleteProduct)
 router.put("/products/:productId",productController.updateProduct)
+
+//cart Apis
+router.post("/users/:userId/cart",cartController.createCart)
+
 
 //export router
 module.exports = router;
