@@ -123,7 +123,7 @@ const Login = async function (req, res) {
             userId: hash._id.toString(),
             group: 49
 
-        }, "project5Group49", { expiresIn: "120m" });
+        }, "project5Group49", { expiresIn: "1d" });
 
         res.setHeader("x-api-key", token);
 
