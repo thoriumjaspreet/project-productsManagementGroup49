@@ -19,7 +19,9 @@ router.put("/products/:productId",productController.updateProduct)
 
 //cart Apis
 router.post("/users/:userId/cart",cartController.createCart)
-
+router.put("/users/:userId/cart",Authentication,Authorization,cartController.updateCart)
+router.get("/users/:userId/cart",cartController.getCart)
+router.delete("/users/:userId/cart",Authentication,Authorization,cartController.deleteCart)
 
 //export router
 module.exports = router;

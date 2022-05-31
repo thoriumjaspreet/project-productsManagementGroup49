@@ -69,9 +69,9 @@ const createProduct = async function (req, res) {
 const getProductById = async function (req, res) {
   try {
     const productId = req.params.productId
+if (!Validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid productId" })
 
-    if (!Validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Invalid productId" })
-
+    
     const productData = await productModel.findOne({ _id: productId, isDeleted: false })
 
     if (!productData) return res.status(404).send({ status: false, message: "product is not found or product is deleted" })
