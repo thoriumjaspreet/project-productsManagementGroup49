@@ -3,6 +3,7 @@ const router = express.Router(); //used express to create route handlers
 const userController = require("../Controllers/userController")
 const productController=require("../Controllers/productController")
 const cartController=require("../Controllers/cartController")
+const orderController=require("../Controllers/orderController")
 const {Authentication,Authorization} =require('../middleware/auth')
 
 //User APIs
@@ -23,5 +24,8 @@ router.put("/users/:userId/cart",Authentication,Authorization,cartController.upd
 router.get("/users/:userId/cart",cartController.getCart)
 router.delete("/users/:userId/cart",Authentication,Authorization,cartController.deleteCart)
 
+
+//order apis
+router.post("/users/:userId/orders",orderController.orderCreate)
 //export router
 module.exports = router;
