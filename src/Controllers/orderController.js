@@ -85,7 +85,7 @@ const orderCreate = async function (req, res) {
             totalItems:items.length
         }
 
-        if (cartData.totalItems = 1) {
+        if (cartData.totalItems <= 1) {
             order.totalItems = cartData.totalItems
         } else {
             order.totalItems = cartData.totalItems - items.length
