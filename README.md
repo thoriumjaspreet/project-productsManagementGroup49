@@ -336,7 +336,7 @@ Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
   deletedAt: {Date, when the document is deleted}, 
   isDeleted: {boolean, default: false},
   createdAt: {timestamp},
-  updatedAt: {timestamp},
+  updatedAt: {timestamp},-
 }
 ```
 
