@@ -27,5 +27,6 @@ router.delete("/users/:userId/cart",Authentication,Authorization,cartController.
 
 //order apis
 router.post("/users/:userId/orders",orderController.orderCreate)
+router.put("/users/:userId/orders",orderController.updateOrder)
 //export router
 module.exports = router;
