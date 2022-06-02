@@ -19,14 +19,14 @@ router.delete("/products/:productId",productController.deleteProduct)
 router.put("/products/:productId",productController.updateProduct)
 
 //cart Apis
-router.post("/users/:userId/cart",cartController.createCart)
+router.post("/users/:userId/cart",Authentication,Authorization,cartController.createCart)
 router.put("/users/:userId/cart",Authentication,Authorization,cartController.updateCart)
-router.get("/users/:userId/cart",cartController.getCart)
-router.delete("/users/:userId/cart",Authentication,Authorization,cartController.deleteCart)
+router.get("/users/:userId/cart",Authentication,Authorization,cartController.getCart)
+router.delete("/users/:userId/cart",Authentication,Authorization,Authentication,Authorization,cartController.deleteCart)
 
 
 //order apis
-router.post("/users/:userId/orders",orderController.orderCreate)
-router.put("/users/:userId/orders",orderController.updateOrder)
+router.post("/users/:userId/orders",Authentication,Authorization,orderController.orderCreate)
+router.put("/users/:userId/orders",Authentication,Authorization,orderController.updateOrder)
 //export router
 module.exports = router;

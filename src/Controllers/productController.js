@@ -38,9 +38,24 @@ const createProduct = async function (req, res) {
     if(style){
     if (!Validator.isValidString(style)) return res.status(400).send({ status: false, message: "style must be alphabetic characters" })
     }
-    if(availableSizes){
-    if (!Validator.isValidavailableSizes(availableSizes)) return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
-    }
+    // if(availableSizes!=undefined){
+    //   let a= availableSizes
+
+    //   if (!(a=="S"||a=="XS"||a=="M"||a=="XL"||a=="XXL"||a=="XL")) return res.status(400).send({ status: false, massage: 'wrong sizes' })
+    // }
+   
+    let clean = availableSizes.replace(/[^A-Z]+/gi, "");
+        let values = clean.split("");
+        for (let i = 0; i < values.length; i++) {
+            if ((values[i].S == 'S') || (values[i].XS == 'XS') || (values[i].M == 'M') || (values[i].X == 'X') || (values[i].L == 'L') || (values[i].XXL == 'XXL') || (values[i].XL == 'XL')) {
+            } 
+            else {
+                return res.status(400).send({ status: false, msg: "Plz Enter availableSizes From S, XS, M, X, L, XXL, XL" });
+            }
+          }
+        
+
+
     if(installments){
     if (!/^[0-9]+$/.test(installments)) return res.status(400).send({ status: false, message: "installments must be in numeric" })
     }
@@ -89,8 +104,19 @@ const getProduct = async function (req, res) {
     if (filter) {
       const { name, description, isFreeShipping, style, size, installments} =
         filter;
+        
+        
+        
+        if(! ["name", "description","isFreeShipping","style", "size","installments"].indexOf(filter) == -1)
 
-      let nameIncludes = new RegExp(`${filter.name}`, "gi");
+         
+        return res.status(400).send({ status: false, message: "invalid filter" })
+        
+      
+      
+        let nameIncludes = new RegExp(`${filter.name}`, "gi");
+
+      
 
       if (name) {
         if (!Validator.isValidString(name)) return res.status(400).send({ status: false, message: "name  must be alphabetic characters" })
@@ -189,6 +215,12 @@ const updateProduct = async function (req, res) {
     let productId = req.params.productId;
     let data = req.body;
 
+    if (!Validator.isValidObjectId(productId)) {
+    return res.status(400).send({ status: false, message: "Invalid productId" })}
+
+
+    let alreadyDeleted = await productModel.findById(productId)
+  if (!alreadyDeleted) return res.status(404).send({ status: false, msg: "Data not found" })
     let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments } = data
 
     if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please enter data for update" }) }

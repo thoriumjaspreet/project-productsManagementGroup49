@@ -48,7 +48,7 @@ function isValidStatus(value){
 
 function isValidavailableSizes(value){
 
-    if( ["S", "XS","M","X", "L","XXL", "XL"].indexOf(value) == -1) {return false}
+    if(["S", "XS","M","X", "L","XXL", "XL"].indexOf(value) != -1) {return false}
     else return true
  }
  
