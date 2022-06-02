@@ -44,15 +44,23 @@ const createProduct = async function (req, res) {
     //   if (!(a=="S"||a=="XS"||a=="M"||a=="XL"||a=="XXL"||a=="XL")) return res.status(400).send({ status: false, massage: 'wrong sizes' })
     // }
    
-    let clean = availableSizes.replace(/[^A-Z]+/gi, "");
-        let values = clean.split("");
-        for (let i = 0; i < values.length; i++) {
-            if ((values[i].S == 'S') || (values[i].XS == 'XS') || (values[i].M == 'M') || (values[i].X == 'X') || (values[i].L == 'L') || (values[i].XXL == 'XXL') || (values[i].XL == 'XL')) {
-            } 
-            else {
-                return res.status(400).send({ status: false, msg: "Plz Enter availableSizes From S, XS, M, X, L, XXL, XL" });
-            }
-          }
+    // let clean = availableSizes.replace(/[^A-Z]+/gi, "");
+    //     let values = clean.split("");
+    //     for (let i = 0; i < values.length; i++) {
+    //         if ((values[i].S == 'S') || (values[i].XS == 'XS') || (values[i].M == 'M') || (values[i].X == 'X') || (values[i].L == 'L') || (values[i].XXL == 'XXL') || (values[i].XL == 'XL')) {
+    //         } 
+    //         else {
+    //             return res.status(400).send({ status: false, msg: "Plz Enter availableSizes From S, XS, M, X, L, XXL, XL" });
+    //         }
+    //       }
+    let sizes = availableSizes.split(/[\s,]+/)
+        let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        console.log(sizes)
+        for (let i = 0; i < sizes.length; i++) {
+            if (arr.indexOf(sizes[i]) == -1)
+                return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
+        }
+       availableSizes= availableSizes.split(",")
         
 
 
