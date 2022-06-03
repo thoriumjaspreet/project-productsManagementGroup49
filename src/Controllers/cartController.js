@@ -26,16 +26,8 @@ const createCart = async function (req, res) {
     }
     if (toString.call(items) !== "[object Array]")
       return res.status(400).send({ status: false, msg: "items should be array objects" })
-      
-    if (data.cartId) {
-      if (!Validator.isValid(data.cartId)) return res.status(400).send({ status: false, msg: "cart id is required" })
-      if (!Validator.isValidObjectId(data.cartId))
-        return res.status(400).send({ status: false, message: "Invalid cartId" })
-      let cart = await cartModel.findById(data.cartId)
-      if (!cart) {
-        return res.status(400).send({ status: false, message: "cart id is not valid " })
-      }
-    }
+
+  
     let [{ productId, quantity }] = items
 
 
@@ -53,7 +45,7 @@ const createCart = async function (req, res) {
       return res.status(400).send({ status: false, message: `Quantity must be an integer min 1!! ` })
     }
 
-    const isCartExist = await cartModel.findOne({ _id: data.cartId, userId: userId })
+    const isCartExist = await cartModel.findOne({userId: userId })
 
     let totalPrice = 0;
     if (!isCartExist) {
