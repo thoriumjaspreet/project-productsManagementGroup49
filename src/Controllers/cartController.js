@@ -49,6 +49,11 @@ const createCart = async function (req, res) {
       return res.status(400).send({ status: false, message: `Quantity must be an integer min 1!! ` })
     }
     
+    let cart = await cartModel.findOne({_id:data.cartId})
+    if (!cart) {
+      return res.status(400).send({ status: false, message: "cart id is not valid "})
+    }
+    let userCart = cart.userId.toString()
 
     const isCartExist = await cartModel.findOne({userId:userId})
    
@@ -61,7 +66,7 @@ const createCart = async function (req, res) {
         let findProduct = await productModel.findOne({ _id: productId, isDeleted: false });
 
         if (!findProduct) {
-          return res.status(400).send({ status: false, message: "product is not valid or product is deleted" })
+          return res.status(404).send({ status: false, message: "product is not valid " })
         }
         totalPrice = totalPrice + (findProduct.price * quantity)
       }
@@ -199,12 +204,7 @@ const updateCart = async function (req, res) {
     if (!user) {
       return res.status(400).send({ status: false, message: "UserId does not exits" })
     }
-    // if (user._id.toString() !== userIdFromToken) {
-    //     res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
-    //     return
-    // }
-    //authorization
-    //Extract body
+
     const { cartId, productId, removeProduct } = requestBody
 
     if (!Validator.isValidReqBody(requestBody)) {
