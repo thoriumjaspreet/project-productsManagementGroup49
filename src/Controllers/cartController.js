@@ -211,6 +211,10 @@ const updateCart = async function (req, res) {
       return res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide cart details.' })
     }
     //cart
+    
+ if (!Validator.isValid(cartId)) return res.status(400).send({ status: false, msg: "cart id is required" })
+
+
     if (!Validator.isValidObjectId(cartId)) {
       return res.status(400).send({ status: false, message: "Invalid cartId in body" })
     }
