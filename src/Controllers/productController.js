@@ -204,7 +204,7 @@ const updateProduct = async function (req, res) {
     return res.status(400).send({ status: false, message: "Invalid productId" })}
 
 
-    let alreadyDeleted = await productModel.findById(productId)
+    let alreadyDeleted = await productModel.findOne({_id:productId, isDeleted:false})
   if (!alreadyDeleted) return res.status(404).send({ status: false, msg: "Data not found" })
 
     let { title, description, price, currencyId, currencyFormat, style, installments } = data
