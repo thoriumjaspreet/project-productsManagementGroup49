@@ -10,7 +10,7 @@ const createProduct = async function (req, res) {
     let data = JSON.parse(JSON.stringify(req.body))
     let files = req.files;
 
-    let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments,isFreeShipping } = data
+    let { title, description, price, currencyId, currencyFormat, style,  installments,isFreeShipping } = data
     if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data" }) }
 
     if (!Validator.isValid(title)) return res.status(400).send({ status: false, message: "title is Required" });
@@ -23,44 +23,28 @@ const createProduct = async function (req, res) {
     if (!Validator.isValid(description)) return res.status(400).send({ status: false, message: "description is Required" });
     if (!Validator.isValidString(description)) return res.status(400).send({ status: false, message: "description  must be alphabetic characters" })
 
-    if (!(price)) return res.status(400).send({ status: false, message: "price is Required" });
+    if (!price) return res.status(400).send({ status: false, message: "price is Required" });
     if (!/^[0-9 .]+$/.test(price)) return res.status(400).send({ status: false, message: "price must be in numeric" })
 
-    // if (!(!isNaN(Number(quantity)))) {
-    //               return res.status(400).send({ status: false, message: `Quantity should be a valid number` })
-    //           }
-      
-    if (!(currencyId)) return res.status(400).send({ status: false, message: "currrencyId is Required" });
-    if ((["INR"].indexOf(currencyId) == -1)) return res.status(400).send({ status: false, message: "currency Id must be INR" })
 
-    if (!(currencyFormat)) return res.status(400).send({ status: false, message: "currrency formet is Required" });
+      
+    if (!currencyId) return res.status(400).send({ status: false, message: "currrencyId is Required" });
+    if (["INR"].indexOf(currencyId) == -1) return res.status(400).send({ status: false, message: "currency Id must be INR" })
+
+    if (!currencyFormat) return res.status(400).send({ status: false, message: "currrency formet is Required" });
     if ((["₹"].indexOf(currencyFormat) == -1)) return res.status(400).send({ status: false, message: "currency formet must be ₹ " })
     if(style){
     if (!Validator.isValidString(style)) return res.status(400).send({ status: false, message: "style must be alphabetic characters" })
     }
-    // if(availableSizes!=undefined){
-    //   let a= availableSizes
-
-    //   if (!(a=="S"||a=="XS"||a=="M"||a=="XL"||a=="XXL"||a=="XL")) return res.status(400).send({ status: false, massage: 'wrong sizes' })
-    // }
-   
-    // let clean = availableSizes.replace(/[^A-Z]+/gi, "");
-    //     let values = clean.split("");
-    //     for (let i = 0; i < values.length; i++) {
-    //         if ((values[i].S == 'S') || (values[i].XS == 'XS') || (values[i].M == 'M') || (values[i].X == 'X') || (values[i].L == 'L') || (values[i].XXL == 'XXL') || (values[i].XL == 'XL')) {
-    //         } 
-    //         else {
-    //             return res.status(400).send({ status: false, msg: "Plz Enter availableSizes From S, XS, M, X, L, XXL, XL" });
-    //         }
-    //       }
-    let sizes = availableSizes.split(/[\s,]+/)
+  if(!Validator.isValid(data.availableSizes)) return res.status(400).send({status:false,msg:"availableSize required"})
+    let sizes = data.availableSizes.split(/[\s,]+/)
         let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
         console.log(sizes)
         for (let i = 0; i < sizes.length; i++) {
             if (arr.indexOf(sizes[i]) == -1)
                 return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
         }
-       availableSizes= availableSizes.split(",")
+       data["availableSizes"]= sizes
         
 
 
@@ -112,23 +96,10 @@ const getProduct = async function (req, res) {
     if (filter) {
       const { name, description, isFreeShipping, style, size, installments} =
         filter;
-        
-        
-        
-        if(! ["name", "description","isFreeShipping","style", "size","installments"].indexOf(filter) == -1)
-
-         
-        return res.status(400).send({ status: false, message: "invalid filter" })
-        
-      
-      
-        let nameIncludes = new RegExp(`${filter.name}`, "gi");
-
-      
-
+    
       if (name) {
         if (!Validator.isValidString(name)) return res.status(400).send({ status: false, message: "name  must be alphabetic characters" })
-        query.title = nameIncludes;
+        query.title = name;
       }
       if (description) {
         if (!Validator.isValidString(description)) return res.status(400).send({ status: false, message: "description  must be alphabetic characters" })
@@ -150,7 +121,13 @@ const getProduct = async function (req, res) {
         query.installments = installments;
       }
       if (size) {
-        if (!Validator.isValidavailableSizes(size)) return res.status(400).send({ status: false, message: "sizes must be (S, XS,M,X, L,XXL, XL)" })
+        let sizes = size.split(/[\s,]+/)
+        let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        console.log(sizes)
+        for (let i = 0; i < sizes.length; i++) {
+            if (arr.indexOf(sizes[i]) == -1)
+                return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
+        }
         const sizeArr = size
           .trim()
           .split(",")
@@ -229,7 +206,8 @@ const updateProduct = async function (req, res) {
 
     let alreadyDeleted = await productModel.findById(productId)
   if (!alreadyDeleted) return res.status(404).send({ status: false, msg: "Data not found" })
-    let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments } = data
+
+    let { title, description, price, currencyId, currencyFormat, style, installments } = data
 
     if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please enter data for update" }) }
     if (title)
@@ -242,7 +220,6 @@ const updateProduct = async function (req, res) {
       if (!Validator.isValidString(description)) return res.status(400).send({ status: false, message: "description  must be alphabetic characters" })
 
     if (price)
-
       if (!/^[0-9 .]+$/.test(price)) return res.status(400).send({ status: false, message: "price must be in numeric" })
 
     if (currencyId)
@@ -253,8 +230,16 @@ const updateProduct = async function (req, res) {
 
     if (style)
       if (!Validator.isValidString(style)) return res.status(400).send({ status: false, message: "style must be alphabetic characters" })
-    if (availableSizes)
-      if (!Validator.isValidavailableSizes(availableSizes)) return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
+    if (data.availableSizes){
+    let sizes = data.availableSizes.split(/[\s,]+/)
+        let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        console.log(sizes)
+        for (let i = 0; i < sizes.length; i++) {
+            if (arr.indexOf(sizes[i]) == -1)
+                return res.status(400).send({ status: false, message: "availabe sizes must be (S, XS,M,X, L,XXL, XL)" })
+        }
+       data["availableSizes"]= sizes
+      }
 
     if (installments)
       if (!/^[0-9 ]+$/.test(installments)) return res.status(400).send({ status: false, message: "installments must be in numeric" })
