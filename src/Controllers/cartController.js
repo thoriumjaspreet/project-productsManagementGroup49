@@ -20,11 +20,20 @@ const createCart = async function (req, res) {
     }
 
     let items = data.items
+    if(!items) return res.status(400).send({ status: false, msg: "items is required" })
     if (typeof (items) == "string") {
       items = JSON.parse(items)
     }
+    if (toString.call(items) !== "[object Array]")
+    return res.status(400).send({ status: false, msg: "items should be array objects" })
+
+ if (!Validator.isValid(data.cartId)) return res.status(400).send({ status: false, msg: "cart id is required" })
+
+    if (!Validator.isValidObjectId(data.cartId))
+      return res.status(400).send({ status: false, message: "Invalid cartId" })
 
     let [{ productId, quantity }] = items
+   
 
     if (!Validator.isValid(productId)) return res.status(400).send({ status: false, msg: "product id is required" })
 
@@ -39,10 +48,12 @@ const createCart = async function (req, res) {
     if (quantity <= 0) {
       return res.status(400).send({ status: false, message: `Quantity must be an integer min 1!! ` })
     }
+    
 
-    const isCartExist = await cartModel.findOne({ userId: userId })
+    const isCartExist = await cartModel.findOne({userId:userId})
+   
     let totalPrice = 0;
-    if (!isCartExist) {
+    if (!isCartExist){
       for (let i = 0; i < items.length; i++) {
         let productId = items[i].productId
         let quantity = items[i].quantity
@@ -54,7 +65,16 @@ const createCart = async function (req, res) {
         }
         totalPrice = totalPrice + (findProduct.price * quantity)
       }
-      let createCart = await cartModel.create({ userId: userId, items: items, totalPrice: totalPrice, totalItems: items.length })
+      let cart = {
+        userId:userId,
+        items: [{
+            productId: productId,
+            quantity: quantity
+        }],
+        totalPrice: totalPrice,
+        totalItems: items.length
+    }
+      let createCart = await cartModel.create(cart)
       let createItem = createCart.items
       let itemData = createItem.map(({ productId, quantity }) => {
         return { productId, quantity };
@@ -65,7 +85,8 @@ const createCart = async function (req, res) {
           createdAt: createCart.createdAt, updatedAt: createCart.updatedAt
         }
       })
-    } if (isCartExist) {
+    }
+    if(isCartExist){
       items2 = isCartExist.items
     }
     let findProduct = await productModel.findOne({ _id: items[0].productId, isDeleted: false })
