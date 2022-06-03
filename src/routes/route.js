@@ -22,7 +22,7 @@ router.put("/products/:productId",productController.updateProduct)
 router.post("/users/:userId/cart",Authentication,Authorization,cartController.createCart)
 router.put("/users/:userId/cart",Authentication,Authorization,cartController.updateCart)
 router.get("/users/:userId/cart",Authentication,Authorization,cartController.getCart)
-router.delete("/users/:userId/cart",Authentication,Authorization,Authentication,Authorization,cartController.deleteCart)
+router.delete("/users/:userId/cart",Authentication,Authorization,cartController.deleteCart)
 
 
 //order apis
