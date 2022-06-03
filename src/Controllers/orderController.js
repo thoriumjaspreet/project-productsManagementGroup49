@@ -141,9 +141,6 @@ const updateOrder = async function (req, res) {
         let userId = req.params.userId
         const { status, orderId } = requestBody
 
-        // if (!isValidObjectId(userId)) {
-        //     return res.status(400).send({ status: false, message: "provide Valid userId" })
-        // }
 
         let userExist = await userModel.findOne({ _id: userId })
         if (!userExist) {
