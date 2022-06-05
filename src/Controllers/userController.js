@@ -3,6 +3,7 @@ const userModel = require('../models/userModel')
 const Validator = require('../Validator/valid')
 const {uploadFile} =require('../aws/AWS')
 const bcrypt = require('bcrypt');
+const cartModel = require('../Models/cartModel');
 const saltRounds = 10;
 
 /*--------------Post/resgiste-api----------------*/
@@ -69,18 +70,18 @@ const userCreate = async function (req, res) {
        //validation shipping
     if(!add.shipping) return  res.status(400).send({status: false,massage: "shipping is Required"});
     if(!Validator.isValid(add.shipping.street)) return  res.status(400).send({status: false,massage: "Shipping street is Required"});
-    if(!Validator.isValidString(add.shipping.street))return res.status(400).send({ status: false, massage: "Shipping street   must be alphabetic characters" })
+    
     if(!Validator.isValid(add.shipping.city)) return  res.status(400).send({status: false,message: "Shipping city is Required"});
     if(!Validator.isValidString(add.shipping.city))return res.status(400).send({ status: false, massage: "Shipping city   must be alphabetic characters" })
-    if(!add.shipping.pincode) return  res.status(400).send({status: false,message: "shipping pincode is Required"});
+    if(!Validator.isValid(add.shipping.pincode)) return  res.status(400).send({status: false,message: "shipping pincode is Required"});
     if(!/^[0-9]{6}$/.test(add.shipping.pincode)) return res.status(400).send({status: false,message: "Shipping Pincode  is not valid minlenght:-6"});
 //validation of billing
     if(!add.billing) return  res.status(400).send({status: false,message: "billing is Required"});    
-    if(!Validator.isValid(add.billing.street)) return  res.status(400).send({status: false,message: "Billing street is Required"});
+   
     if(!Validator.isValidString(add.billing.street))return res.status(400).send({ status: false, massage: "Billing street   must be alphabetic characters" })
     if(!add.billing.city) return  res.status(400).send({status: false,message: "billing city is Required"});
     if(!Validator.isValidString(add.billing.city))return res.status(400).send({ status: false, massage: "Billing city   must be alphabetic characters" })
-    if(!add.billing.pincode) return  res.status(400).send({status: false,message: "billig pincode is Required"});    
+    if(!Validator.isValid(add.billing.pincode)) return  res.status(400).send({status: false,message: "billig pincode is Required"});    
     if(!/^[0-9]{6}$/.test(add.billing.pincode)) return res.status(400).send({status: false,message: "Billing Pincode  is not valid minlenght:-6"});
     data.address = add
        }  
@@ -125,7 +126,8 @@ const Login = async function (req, res) {
 
         }, "project5Group49", { expiresIn: "1d" });
 
-        res.setHeader("x-api-key", token);
+
+        res.header("Authorization", "Bearer : " + token);
 
         return res.status(200).send({ status: true, message: "User login successfull", iat: new String(Date()),data:{ userId: hash._id.toString(), token }})
     }
@@ -134,17 +136,19 @@ const Login = async function (req, res) {
     }
 }
 
-/*-----------getUserById-api--------------*/
+/*----------------------------------- getUserById-api ------------------------------------------*/
 
 
 const getUserById = async function (req, res) {
     try {
         const userId = req.params.userId
-
+        //validate the userId
         if (!Validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Invalid userId" })
-
-        const userData = await userModel.findOne({ _id: userId })
-            .select({ address: 1, _id: 1, fname: 1, lname: 1, email: 1, profileImage: 1, phone: 1, password: 1 })
+        let userData = await userModel.findById(userId,{password:0}).lean()
+            
+        // find cart of the user 
+        let cartUser = await cartModel.findOne({userId:userId})
+        if(cartUser) userData.cartId = cartUser._id // if the cart are exixts then add in userData
 
         if (!userData) return res.status(404).send({ status: false, message: "User is not found " })
         return res.status(200).send({ status: true, message: "user profile details", data: userData })
@@ -154,7 +158,7 @@ const getUserById = async function (req, res) {
     }
 }
 
-//---Put-api------------------------*/
+//------------------------------------ Put-api ---------------------------------------//
 
 const updatedUser = async function (req, res) {
     try {
@@ -162,7 +166,7 @@ const updatedUser = async function (req, res) {
         let data = req.body
         let update= {}
 
-        let { fname, lname, email, phone, password, address } = data
+        let {fname, lname, email, phone, password, address} = data
        
     
         if (!Validator.isValidReqBody(data)) { return res.status(400).send({ status: false, msg: "Please provide user data for updation" }) }
@@ -201,9 +205,9 @@ const updatedUser = async function (req, res) {
         if (address) {
             add = JSON.parse(address);
            
-            const { shipping, billing } = add
+            const { shipping, billing }= add
             if(shipping){
-                let {street,city,pincode} =shipping
+                let {street,city,pincode}=shipping
             if(street){
                 if(!Validator.isValidString(street))return res.status(400).send({ status: false, message: "Shipping street   must be alphabetic characters" })
             update["address.shipping.street"]=street}

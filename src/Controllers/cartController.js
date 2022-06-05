@@ -76,8 +76,13 @@ const createCart = async function (req, res) {
       })
       return res.status(201).send({
         status: true, msg: "Create cart successfull", data: {
-          _id: createCart._id, userId: createCart.userId, items: itemData, totalPrice: createCart.totalPrice, totalItems: createCart.totalItems,
-          createdAt: createCart.createdAt, updatedAt: createCart.updatedAt
+          _id: createCart._id,
+          userId: createCart.userId,
+          items: itemData,
+          totalPrice: createCart.totalPrice,
+          totalItems: createCart.totalItems,
+          createdAt: createCart.createdAt,
+          updatedAt: createCart.updatedAt
         }
       })
     }
@@ -112,7 +117,13 @@ const createCart = async function (req, res) {
     })
     return res.status(200).send({
       status: true, msg: "update cart successfully"
-      , data: { _id: updateCart._id, userId: updateCart.userId, items: itemData, totalPrice: updateCart.totalPrice, totalItems: updateCart.totalItems, createdAt: updateCart.createdAt, updatedAt: updateCart.updatedAt }
+     ,data: { _id: updateCart._id,
+      userId: updateCart.userId, 
+      items: itemData,
+      totalPrice: updateCart.totalPrice, 
+      totalItems: updateCart.totalItems, 
+      createdAt: updateCart.createdAt, 
+      updatedAt: updateCart.updatedAt }
     })
   } catch (error) {
     return res.status(500).send({ status: false, ERROR: error.message })

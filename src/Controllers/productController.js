@@ -21,14 +21,14 @@ const createProduct = async function (req, res) {
 
 
     if (!Validator.isValid(description)) return res.status(400).send({ status: false, message: "description is Required" });
-    if (!Validator.isValidString(description)) return res.status(400).send({ status: false, message: "description  must be alphabetic characters" })
+   
 
-    if (!price) return res.status(400).send({ status: false, message: "price is Required" });
+    if (!Validator.isValid(price)) return res.status(400).send({ status: false, message: "price is Required" });
     if (!/^[0-9 .]+$/.test(price)) return res.status(400).send({ status: false, message: "price must be in numeric" })
 
 
       
-    if (!currencyId) return res.status(400).send({ status: false, message: "currrencyId is Required" });
+    if (!Validator.isValid(currencyId)) return res.status(400).send({ status: false, message: "currrencyId is Required" });
     if (["INR"].indexOf(currencyId) == -1) return res.status(400).send({ status: false, message: "currency Id must be INR" })
 
     if (!currencyFormat) return res.status(400).send({ status: false, message: "currrency formet is Required" });
