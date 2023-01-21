@@ -7,8 +7,9 @@ const isValidReqBody = function(value){
 
 const isValid = function(value) {
     if(typeof (value) == "undefined" || typeof (value) == null) {return false}
-    if(typeof (value).trim().length == 0){ return false}
-    if(typeof (value) == "string" && (value).trim().length > 0) {return true}
+    if(typeof (value) == "string" && (value).trim().length == 0) {return false}
+    if(typeof (value) == 'number' && (value).toString().trim().length == 0){return false}
+    return true
 }
 
 const isValidString = function(value){
@@ -25,6 +26,8 @@ const isValidPhone = function(value){
     if( /^\d{10}$/.test(value)) {return true}
     else return false
 }
+
+
 const isValidPassword = function(value){
     if(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/.test(value)==true) {return true}
     else return false
@@ -38,14 +41,23 @@ function isValidObjectId(id){
     }
     return false;
 }
-function isValidTitle(value){
+function isValidStatus(value){
 
-   if( ["Mr", "Miss", "Mrs"].indexOf(value) == -1) {return false}
+   if( ["pending", "completed", "cancled"].indexOf(value) == -1) {return false}
    else return true
 }
+
+function isValidavailableSizes(value){
+
+    if(["S", "XS","M","X", "L","XXL", "XL"].indexOf(value) != -1) {return false}
+    else return true
+ }
+ 
+
 function isValidDate(value){
     var regEx = /^\d{4}-\d{2}-\d{2}$/;
     if(!value.match(regEx)) return false; 
     return true
 }
-module.exports = {isValid , isValidPhone,isValidEmail , isValidPassword,isValidObjectId,isValidTitle, isValidReqBody,isValidString,isValidDate}
+module.exports = {isValid , isValidPhone,isValidEmail , isValidPassword,isValidObjectId,isValidStatus,
+     isValidReqBody,isValidString,isValidDate,isValidavailableSizes}
